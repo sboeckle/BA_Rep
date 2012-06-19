@@ -23,9 +23,9 @@ public class MySocketServerConnection extends Thread {
 				System.out.println("Server: waiting for message ...");
 
 				try {
-					// String string=(String)objectInputStream.readObject();
-					// System.out.println("Server: received '"+string+"'");
-					// objectOutputStream.writeObject("server received "+string);
+					 String string=(String)objectInputStream.readObject();
+					 System.out.println("Server: received '"+string+"'");
+					 objectOutputStream.writeObject("server received "+string);
 
 				} catch (Exception e) {
 					e.printStackTrace();
