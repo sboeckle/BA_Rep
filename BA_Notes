@@ -1,0 +1,13 @@
+Zugriff auf Acknoledged Bytes:
+
+  -JpCap geht mit Winpcap/Libpcap (linux) 
+    *Favorit, da am einfachsten
+
+  -JpCap @ sourceforge
+    benötigt auch Winpcap
+
+  -jnetpcap
+    auch mit WinpCap
+	    * jnetstream Framework baut aber auf jnetpcap bzw winpcap auf
+
+  -Über JNI mit C auf OS library zugreifen (zu aufwändig?)
