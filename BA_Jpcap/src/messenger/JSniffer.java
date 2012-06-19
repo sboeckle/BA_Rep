@@ -17,9 +17,9 @@ class JSniffer {
 
 	/* variables */
 	JpcapCaptor captor;
-	NetworkInterface[] list;
+	NetworkInterface[] devices;
 	String str, info;
-	int x, choice;
+	int i, choice;
 
 	public static void main(String args[]) {
 		new JSniffer();
@@ -28,22 +28,36 @@ class JSniffer {
 	public JSniffer() {
 	    	     
 		     /* first fetch available interfaces to listen on */
-		        list = JpcapCaptor.getDeviceList();
+		devices = JpcapCaptor.getDeviceList();
 			System.out.println("Available interfaces: ");
 			
-			for(x=0; x<list.length; x++) {
-			     System.out.println(x+" -> "+list[x].description);  
+			for(i=0; i<devices.length; i++) {
+				//print out its name and description
+				  System.out.println(i+": "+devices[i].name + "(" + devices[i].description+")");
+
+				  //print out its datalink name and description
+				  System.out.println(" datalink: "+devices[i].datalink_name + "(" + devices[i].datalink_description+")");
+
+				  //print out its MAC address
+				  System.out.print(" MAC address:");
+				  for (byte b : devices[i].mac_address)
+				    System.out.print(Integer.toHexString(b&0xff) + ":");
+				  System.out.println();
+
+				  //print out its IP address, subnet mask and broadcast address
+				  for (NetworkInterfaceAddress a : devices[i].addresses)
+				    System.out.println(" address:"+a.address + " " + a.subnet + " "+ a.broadcast);
 			}
 		            System.out.println("-------------------------\n");
 		            choice = Integer.parseInt(getInput("Choose interface (0,1..): "));
-			    System.out.println("Listening on interface -> "+list[choice].description);
+			    System.out.println("Listening on interface -> "+devices[choice].name);
 			    System.out.println("-------------------------\n");
 		  
 		  
 		  
 		  /*Setup device listener */
 		  try {
-		         captor=JpcapCaptor.openDevice(list[choice], 65535, false, 20);
+		         captor=JpcapCaptor.openDevice(devices[choice], 65535, false, 20);
 			 /* listen for TCP/IP only */
 			 captor.setFilter("ip and tcp", true);
 		      }
@@ -51,15 +65,22 @@ class JSniffer {
 		  
 		  
 		  /* start listening for packets */
-		  while (true) {
+		//  while (true) {
+		    for (int i = 0; i < 40;) {
+					
+				
 			  TCPPacket info = (TCPPacket)captor.getPacket();
 		      if(info != null){
 		    	  System.out.println("--------------------TCP/IP Packet recived--------------------");
+		    	  System.out.println("From: "+ info.src_ip);
+		    	  System.out.println("To: "+ info.dst_port);
 		    	  System.out.println("is acknowledged: " +info.ack);
 		    	  System.out.println("AcknowledgeNumber: " +info.ack_num);
 		          System.out.print(getPacketText(info));
+		          i++;
 	             }
-	    	}
+			}
+	    //	}
 	    }
 
 	/* get user input */
