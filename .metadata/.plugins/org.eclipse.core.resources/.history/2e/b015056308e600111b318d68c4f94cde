@@ -1,0 +1,36 @@
+package de.htwg_konstanz.in.copy.zip;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.zip.CRC32;
+import java.util.zip.CheckedInputStream;
+import java.util.zip.Checksum;
+import java.util.zip.ZipInputStream;
+
+public class ZipChecker {
+	ZipInputStream zipIn;
+	CheckedInputStream checkIn;
+	
+	
+	public ZipChecker(InputStream in){
+		zipIn = new ZipInputStream(in);
+		Checksum crc = new CRC32();
+		checkIn = new CheckedInputStream(zipIn, crc);
+	}
+	
+	private long getTheChecksum(File file) throws IOException {
+		InputStream in = new FileInputStream(file);
+		Checksum checksum = new CRC32();
+		CheckedInputStream chIn = new CheckedInputStream(in,checksum);
+		while(chIn.read() != -1){
+			//just go through the File to be able to create Checksum
+			// System.out.println("reading file");
+		}
+		long res = chIn.getChecksum().getValue();
+		return res;
+	}
+	
+
+}

@@ -1,0 +1,77 @@
+package de.htwg_konstanz.in.copy.zip;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.zip.CRC32;
+import java.util.zip.CheckedInputStream;
+import java.util.zip.Checksum;
+import java.util.zip.ZipInputStream;
+
+public class File {
+	ZipInputStream zipIn;
+	CheckedInputStream checkIn;
+	
+	
+	public ZipChecker(File file){
+		zipIn = new ZipInputStream(in);
+		Checksum crc = new CRC32();
+		checkIn = new CheckedInputStream(zipIn, crc);
+	}
+	
+	private long getTheChecksum() throws IOException {
+		 ZipFile zipFile = new ZipFile("c:/FileIO/WebFiles.zip");
+         
+         /*
+              * Get list of zip entries using entries method of
+              * ZipFile class.
+              */
+         
+              Enumeration e = zipFile.entries();
+             
+              System.out.print("File Name");
+              System.out.print("\t\t\t\tCRC-32 Checksum");
+              System.out.print("\n---------------------------------\n");
+             
+              while(e.hasMoreElements())
+              {
+                      ZipEntry entry = (ZipEntry)e.nextElement();
+                     
+                      /*
+                       * To get CRC-32 checksum of an entry, use
+                       *
+                       * long getCrc()
+                       * method of Java ZipEntry class.
+                       *
+                       * This method returns the CRC checksum for a particular
+                       * zip entry, or -1 if not known.
+                       */                            
+                       
+                      String entryName = entry.getName();
+                      long crc = entry.getCrc();
+                     
+                      System.out.print(entryName);
+                      System.out.print("\t\t\t\t" + crc);
+                      System.out.print("\n");
+                                                     
+              }
+       
+               /*
+                * close the opened zip file using,
+                * void close()
+                * method.
+                */
+               
+                zipFile.close();
+             
+       }
+       catch(IOException ioe)
+       {
+              System.out.println("Error opening zip file" + ioe);
+       }
+		return res;
+	}
+	
+
+}

@@ -1,0 +1,140 @@
+/**
+ * 
+ */
+package de.htwg_konstanz.in.copy;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.Date;
+
+import javax.swing.JOptionPane;
+
+import de.htwg_konstanz.in.copy.zip.FileChecker;
+
+/**
+ * @author Ellen
+ * 
+ */
+public class TestApplication implements Runnable {
+
+	Client sender;
+	Date c;
+
+	public TestApplication(Client sender) {
+		this.sender = sender;
+	}
+
+	public static void main(String[] args) {
+		try {
+			String path = FileChecker.convertIt("C:/jdk-6u3");
+			Client sender = new Client();
+			TestApplication testApplication = new TestApplication(sender);
+			Thread thread = new Thread(testApplication);
+			thread.start();
+			boolean done = false;
+			while (!done) {
+				String m = JOptionPane.showInputDialog("File Located: ");
+				if (m == null || m.equals("")) {
+					m = path;
+				}
+				// int res =
+				done = sender.parseAndSendFile(m);
+				// switch (res){
+				// case 0:
+				// System.out.println("Normal Message sent");
+				// break;
+				// case -1:
+				// System.out.println("Message stored because of switching");
+				// break;
+				// case -2:
+				// System.out.println("Not all Stored Message where sent because of switching");
+				// break;
+				// case 1:
+				// System.out.println("All stored Message where sent");
+				// break;
+				// default:
+				// System.out.println("Shouldn't happen!");
+				// break;
+				// }
+			}
+			
+			thread.interrupt();
+		} catch (Exception e) {
+			e.printStackTrace();
+			break;
+		}
+		
+		// Test if original File and sent/recieved File are the same
+		try {
+			int cBB = FileChecker.CompareFilesbyByte("C:/jdk-6u3",
+					"C:/recievedFile");
+			if (cBB == -2) {
+				System.err.println("The two files have different lengths!");
+			} else if (cBB == -1) {
+				System.err.println("Difference using CompareFilesByBytes!");
+			} else
+				System.out
+						.println("The Files are the same according to CompareFilesByBytes :) ");
+
+			if (FileChecker.MD5HashFile("C:/jdk-6u3").equals(
+					FileChecker.MD5HashFile("C:/recievedFile"))) {
+				System.out.println("No Differnce using MD5HashFile Method!");
+			} else
+				System.err.println("Difference using MD5HashFile!");
+
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			sender.getSocket().close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("END");
+	}
+
+	public void run() {
+		int i = 1;
+		while (true) {
+			// "random" time to wait before switching connection
+			int randomTimeInMillis = (int) (Math.random() * 5000) + 5000;
+			System.out.println("SLEEP: " + randomTimeInMillis);
+			try {
+				Thread.sleep(5000);
+				c = new Date();
+				System.out.println(c + ": SWITCH");
+				Socket socket = new Socket("localhost", 8205);
+				sender.isSwitching = true;
+				sender.getSocket().switchSocket(socket);
+				sender.getSocket().clientName = "Client NR " + i;
+				c = new Date();
+				// Waiting some seconds to simulate the switching-process time
+				// System.out.println(c+
+				// ": Switch ended: waiting for another 3 secs...");
+				// Thread.sleep(1000);
+				sender.isSwitching = false;
+				c = new Date();
+				System.out.println(c + ": done with switching...");
+				// Thread.sleep(6000);
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				break;
+			}
+			i++;
+		}
+
+	}
+
+}

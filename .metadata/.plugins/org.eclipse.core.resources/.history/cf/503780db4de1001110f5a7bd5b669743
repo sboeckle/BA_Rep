@@ -1,0 +1,40 @@
+package de.htwg_konstanz.in;
+
+public class QueueString {
+
+public NodeString head, tail;
+	private int size = 0;
+	
+	public QueueString() {
+		head = null;
+		tail = null;
+	}
+
+	public boolean empty() {
+		return (head == null);
+	}
+
+	public String get() {
+		String v = head.value;
+		head = head.next;
+		this.size--;
+		return v;
+	}
+
+	public void put(String item) {
+		NodeString t = tail;
+		tail = new NodeString(item);
+		if (empty())
+			head = tail;
+		else
+			t.next = tail;
+		
+		this.size--;
+	}
+	public int size(){
+		if(empty() == true) return 0;
+		int i = 0 ;
+		for(Node t = )
+	}
+	
+}

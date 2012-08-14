@@ -1,0 +1,12 @@
+1341484795972	Rename compilation unit 'Test.java'
+1341486668206	Copy compilation units
+1341486688012	Delete element
+1341486689370	Delete element
+1341658626220	Delete element
+1341662334871	Encapsulate field 'isSwitchException'
+1341662353519	Encapsulate field 'isSwitchException'
+1341667155917	Copy compilation units
+1341667163510	Delete element
+1341667184018	Rename type 'SwitchableSocket'
+1341667188730	Rename type 'SwitchableOutputStream'
+1341667192255	Rename type 'SwitchableInputStream'
