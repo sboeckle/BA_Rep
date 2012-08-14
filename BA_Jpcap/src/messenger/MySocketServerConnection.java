@@ -12,19 +12,18 @@ public class MySocketServerConnection extends Thread {
 		this.socket = socket;
 		objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
 		objectInputStream = new ObjectInputStream(socket.getInputStream());
-		System.out.println("Server: incoming connection accepted.");
+		System.out.println("[Server]: incoming connection accepted.");
 	}
 
 	public void run() {
-		// while(true)
-		for (int i = 0; i < 5; i++) {
+		while(true){
 
 			{
-				System.out.println("Server: waiting for message ...");
+				System.out.println("[Server]: waiting for message ...");
 
 				try {
 					 String string=(String)objectInputStream.readObject();
-					 System.out.println("Server: received '"+string+"'");
+					 System.out.println("[Server]: received '"+string+"'");
 					 objectOutputStream.writeObject("server received "+string);
 
 				} catch (Exception e) {

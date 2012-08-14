@@ -2,6 +2,8 @@ package messenger;
 
 import java.io.IOException;
 
+import javax.swing.JOptionPane;
+
  
 public class ClientMain {
 	private static final int port=1234;
@@ -12,8 +14,9 @@ public class ClientMain {
 		try {
 			while(true){
 				createClient();			
-				String clientName=System.console().readLine();
-				System.out.println(client.sendAndReceive(clientName));
+				String clientName=JOptionPane.showInputDialog("Your message: ");
+				JOptionPane.showInputDialog("--InfoMessage-- Just click OK! "+ "\n" + client.sendAndReceive(clientName));
+				//System.out.println(client.sendAndReceive(clientName));
 			}
 		}
 		catch(Exception e) {
@@ -24,7 +27,6 @@ public class ClientMain {
 	private static void createClient() throws IOException {
 		if(client == null){
 			client=new MySocketClient(hostname,port);
-			System.out.print("Client: Enter name> ");
 		}
 		
 	}
