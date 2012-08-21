@@ -2,17 +2,12 @@ package de.htwg_konstanz.in.copy;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.Arrays;
-import java.util.zip.CRC32;
-import java.util.zip.CheckedInputStream;
-import java.util.zip.Checksum;
-import java.util.zip.ZipInputStream;
 
 public class FileChecker {
 
@@ -25,16 +20,21 @@ public class FileChecker {
 	 */
 	public static String convertIt(String path) throws IOException{
 		File f1 = new File(path);
-		FileInputStream fis1 = new FileInputStream(f1);
+		System.out.println("Filelength of File to convert: "+f1.length());
+		FileInputStream fis1 = new FileInputStream(path);
 		byte[] buff = new byte[1024];
-		OutputStream out = new FileOutputStream("C:/convertedFile");
-		while(fis1.read(buff) != -1){
+		OutputStream out = new FileOutputStream("C:/convertedFile.exe");
+		long readData = 0;
+		long res = 0;
+		while((res = fis1.read(buff)) != -1){
 			out.write(buff);
+			readData += res;			
 		}
+		System.out.println("totalBytes wrote in converted File: "+ readData);
 		fis1.close();
 		out.flush();
 		out.close();
-		return "C:/convertedFile";
+		return "C:/convertedFile.rar";
 	}
 
 	// reading bytes and compare

@@ -8,8 +8,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Date;
 
-import javax.swing.JOptionPane;
-
 
 /**
  * @author Ellen
@@ -25,7 +23,7 @@ public class TestApplication implements Runnable {
 	}
 
 	public static void main(String[] args) throws IOException {
-		String p = FileChecker.convertIt("C:/jdk-6u3");
+		String p = FileChecker.convertIt("C:/jdk-6u3.exe");
 		System.out.println("File converted path: " + p);
 		Client sender = new Client();	
 		TestApplication testApplication = new TestApplication(sender);
@@ -33,11 +31,11 @@ public class TestApplication implements Runnable {
 		thread.start();
 		boolean done = false;
 		while (!done) {
-			String m = 
-				JOptionPane.showInputDialog("File Located: ");
-			if(m == null || m.equals("") ){
-				m = "C:/convertedFile";
-			}
+//			String m = 
+//				JOptionPane.showInputDialog("File Located: ");
+//			if(m == null || m.equals("") ){
+			String	m = "C:/convertedFile.exe";
+//			}
 			try {
 //				int res = 
 				done = sender.parseAndSendFile(m);
@@ -76,9 +74,13 @@ public class TestApplication implements Runnable {
 
 	
 	public void run() {
+		//with i is decided on which port a connection request
+		//has to be tried. which has to be the same port as the serversocket is listening on.
+		//	to test multiply serverswitches
 		int i = 1;
 		while (true) {
-			int time = 4000;
+			int time = 3000;
+			int port = 0;
 			// "random" time to wait before switching connection
 			// int randomTimeInMillis = (int) (Math.random() * 5000)+5000;
 			System.out.println("SLEEP: "+ time + "secs" );
@@ -86,7 +88,11 @@ public class TestApplication implements Runnable {
 				Thread.sleep(time);
 				c = new Date();
 				System.out.println(c+ ": SWITCH");
-				Socket socket = new Socket("localhost", 8205);
+				if(i % 2 == 0){
+					port = 8205;
+				}else port = 8222;		
+				
+				Socket socket = new Socket("localhost", port);
 				sender.isSwitching = true;
 				sender.getSocket().switchSocket(socket);
 				sender.getSocket().clientName = "Client NR " +i;

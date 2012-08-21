@@ -54,12 +54,12 @@ public class SwitchableSocket extends Socket {
 				int numberOfBytesToRead = newSocket.getInputStream().read();
 				switchableInputStream.setNumberOfBytesToRead(numberOfBytesToRead);
 			}
+			// signal the input stream that the next Exception is because of the switching 
+			// and gives the new InputStream to switch to
 			isSwitchException = true;
 			switchableInputStream.setSwitchException(isSwitchException);
-			// signal the input stream to switch when it finished reading all data from the old connection
-			// has to be finished before one side calls shutdownOutput()
 			switchableInputStream.switchInputStream(newSocket.getInputStream());		
-	
+			
 			// try to transfer settings from old socket to the new one
 			// ignore exceptions to leave the user unaware of internal switching of connection
 			try {
@@ -101,13 +101,11 @@ public class SwitchableSocket extends Socket {
 			}
 	
 			// switch socket reference
-			Socket oldSocket = socket;
-			
+			Socket oldSocket = socket;			
 			socket = newSocket;
 			oldSocket.close();
-	//		oldSocket.close();
 			
-	//		oldOutputStream.write(1);
+		// werden isSwitchException von In/Outputstream wirklich wieder auf false gesetzt?
 		}catch(IOException e){
 			if (isSwitchException){
 				System.out.println("Exception because of switching!!!");
@@ -115,7 +113,6 @@ public class SwitchableSocket extends Socket {
 				isSwitchException = false;
 				switchableInputStream.setSwitchException(isSwitchException);
 				switchableOutputStream.setSwitchException(isSwitchException);
-				//Do Nothing
 			}else{
 				e.printStackTrace();
 			}
