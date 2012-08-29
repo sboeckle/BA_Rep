@@ -32,7 +32,11 @@ public class SwitchableInputStream extends InputStream {
 	public boolean readyToBeClosed = false;
 
 	private boolean isSwitchException = false;
+	private boolean isReading = false;
 
+	public boolean isReading() {
+		return isReading;
+	}
 	public SwitchableInputStream(InputStream inputStream) {
 		this.inputStream = inputStream;
 		this.newInputStreams = new LinkedBlockingQueue<InputStream>();
@@ -149,6 +153,7 @@ public class SwitchableInputStream extends InputStream {
 				}
 
 			} else
+				this.isReading = true;
 				data = inputStream.read(b,off,len);
 
 		} catch (SocketException e) {
@@ -176,7 +181,7 @@ public class SwitchableInputStream extends InputStream {
 		} else {
 			System.out.println("-------------------1 ");
 		}
-
+		this.isReading = false;
 		return data;
 	}
 
@@ -233,6 +238,7 @@ public class SwitchableInputStream extends InputStream {
 				}
 
 			} else
+				this.isReading = true;
 				data = inputStream.read(b);
 
 		} catch (SocketException e) {
@@ -260,7 +266,7 @@ public class SwitchableInputStream extends InputStream {
 		} else {
 			System.out.println("-------------------1 ");
 		}
-
+		this.isReading = false;
 		return data;
 	}
 
@@ -274,6 +280,7 @@ public class SwitchableInputStream extends InputStream {
 		int data = 0;
 		try {
 			System.out.println("Someone called read()!!!");
+			this.isReading = true;
 			data = inputStream.read();
 			System.out.println("DATA recieved: " + data);
 		} catch (SocketException e) {
@@ -298,6 +305,7 @@ public class SwitchableInputStream extends InputStream {
 		} else {
 			System.out.println("-------------------1 ");
 		}
+		this.isReading = false;
 
 		return data;
 

@@ -67,12 +67,15 @@ public class SwitchableSocket extends Socket {
 				System.out.println("message " + message);
 				int numberOfBytesToRead = Integer.parseInt(message);
 				putNewInputStream(newSocket);
-				
 				//Are all the needed Bytes already there?
 				if(numberOfBytesToRead == switchableInputStream.getNumberOfBytesReceived()){
-					//Then just switch the Stream
-					switchSocketReference(oldSocket, newSocket);
 					System.out.println("numberOfBytesToRead == numberOfBytesToReceived");
+					//Then just switch the Reference and the Stream
+					switchSocketReference(oldSocket, newSocket);
+					if(switchableInputStream.isReading() != true){
+						// Is needed because if there isn't reading something on the inputstream, no  switchException is thrown which switches the stream
+						switchableInputStream.internStreamSwitch();
+					}
 					// signals the input stream that the next Exception is because of switching
 					switchableInputStream.setSwitchException(true);
 					oldSocket.close();
@@ -83,8 +86,8 @@ public class SwitchableSocket extends Socket {
 							+ numberOfBytesToRead);
 					switchableInputStream
 							.setNumberOfBytesToRead(numberOfBytesToRead);
+					// wait till all bytes are read over old connection bevore switching
 					synchronized (SwitchableInputStream.monitor) {
-						// wait till all bytes are read over old connection bevore switching
 						SwitchableInputStream.monitor.wait();
 						System.out.println("Jetzt in dem synchronized switchSocket Block");
 						switchableInputStream.setSwitchException(true);
