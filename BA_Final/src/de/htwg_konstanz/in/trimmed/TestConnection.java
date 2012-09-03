@@ -1,32 +1,47 @@
 package de.htwg_konstanz.in.trimmed;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class TestConnection {
+public class TestConnection implements Runnable{
+	
+	SwitchableSocket ss;
+	static OutputStream out;
+	
+	public TestConnection() throws UnknownHostException, IOException {
+		Socket s = new Socket(Constants.SERVER_ADDRESS, Constants.SERVER_PORT);
+		this.ss = new SwitchableSocket(s);
+		System.out.println("connected to: " + s.getInetAddress());
+		out = s.getOutputStream();
+	}
 	
 	public static void main(String[] args) {
 		try {
-			Socket s = new Socket("141.37.179.70", 8081);
-			System.out.println("connected to: " + s.getInetAddress());
-			OutputStream out = s.getOutputStream();
+			TestConnection test = new TestConnection();
+			Thread thread = new Thread(test);
+			thread.start();
 //			FileInputStream fIn = new FileInputStream(new File("C:/convertedFile.zip"));
-			byte[] buffer = new byte[32];
-//			System.out.println("writing...");
-//			int read;
-//			while ( (read = fIn.read(buffer)) != -1) {
-//				out.write(buffer, 0, read);
-//				buffer = new byte[512];
-//			}
-//			fIn.close();
-			String message= "26345";
-			out.write(message.getBytes(), 0, message.getBytes().length);
-			out.flush();
+			int[] data = new int[10000000];
+			for(int i = 0 ; i < data.length ; i++){
+				data[i] = i*2;
+			}
+			
+			System.out.println("writing...");
+			int x = 0;
+			int numberOfBytesSent = 0;
+			while (x <= data.length) {
+				out.write(data[x]);
+				out.flush();
+				numberOfBytesSent++;
+				x++;
+			}
+			
+			System.out.println("numberOfBytesSent: "+ numberOfBytesSent);
+			
 			out.close();
+			thread.interrupt();
 			System.out.println("finished");
 			System.out.println("ENDE");
 		} catch (UnknownHostException e) {
@@ -34,6 +49,38 @@ public class TestConnection {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void run() {
+		while (true) {
+			// "random" time to wait before switching connection
+			int randomTimeInMillis = (int) (Math.random() * 5000)+500;
+			System.out.println("SLEEP: "+ randomTimeInMillis + "milliSecs" );
+			try {
+				Thread.sleep(randomTimeInMillis);
+				System.out.println("SWITCH");	
+				
+				Socket socket = new Socket(Constants.SERVER_ADDRESS, Constants.SERVER_PORT);
+				ss.switchSocket(socket);
+				//Waiting some seconds to simulate the switching-process time
+		//		System.out.println(c+  ": Switch ended: waiting for another 3 secs...");
+		//		Thread.sleep(1000);
+				System.out.println("done with switching...");
+				//Thread.sleep(6000);
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();			
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				break;
+			}
+		}
+		
 	}
 	
 

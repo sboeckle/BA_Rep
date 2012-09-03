@@ -20,7 +20,6 @@ public class SwitchableSocket extends Socket {
 	private SwitchableInputStream switchableInputStream;
 	private SwitchableOutputStream switchableOutputStream;
 
-
 	public SwitchableSocket(Socket socket) throws IOException {
 		this.socket = socket;
 		switchableInputStream = new SwitchableInputStream(
@@ -29,14 +28,6 @@ public class SwitchableSocket extends Socket {
 				socket.getOutputStream());
 	}
 
-	public SwitchableSocket(Socket socket, String clientName)
-			throws IOException {
-		this.socket = socket;
-		switchableInputStream = new SwitchableInputStream(
-				socket.getInputStream());
-		switchableOutputStream = new SwitchableOutputStream(
-				socket.getOutputStream());
-	}
 	/**
 	 * Switches Socket which is already in use to the newSocket
 	 * @param newSocket
@@ -44,21 +35,22 @@ public class SwitchableSocket extends Socket {
 	public void switchSocket(Socket newSocket) {
 		try {
 			Socket oldSocket = socket;
+			System.out.println("vor switchableOutputStream");
 			synchronized (switchableOutputStream) {
+				// Get the number of Bytes sent over old connection and switch the outputstream
+				System.out.println("in synchr switchableOutputStream");
 				int numberOfBytesSent = switchableOutputStream
 						.switchOutputStream(newSocket.getOutputStream());
 				System.out.println("Anzahl an gesendeten Daten: "
 						+ numberOfBytesSent);
 				String bytes = Integer.toString(numberOfBytesSent);
+				//Tell the other side how many Bytes where sent over the old connection
 				newSocket.getOutputStream().write(bytes.getBytes(), 0,
 						bytes.getBytes().length);
 				newSocket.getOutputStream().flush();
-				System.out.println("newSocket: wrote and flushed the String "
-						+ bytes);
 
-				// try to receive how many bytes must be read from old
-				// connection via
-				// new connection
+				//Try to receive how many bytes must be read from old
+				//connection via new connection
 				String message;
 				byte[] buffer = new byte[64];
 				newSocket.getInputStream().read(buffer);
@@ -66,20 +58,19 @@ public class SwitchableSocket extends Socket {
 
 				System.out.println("message " + message);
 				int numberOfBytesToRead = Integer.parseInt(message);
-				putNewInputStream(newSocket);
+				switchableInputStream.putNewInputStream(newSocket.getInputStream());
 				//Are all the needed Bytes already there?
 				if(numberOfBytesToRead == switchableInputStream.getNumberOfBytesReceived()){
 					System.out.println("numberOfBytesToRead == numberOfBytesToReceived");
 					//Then just switch the Reference and the Stream
 					switchSocketReference(oldSocket, newSocket);
 					if(switchableInputStream.isReading() != true){
-						// Is needed because if there isn't reading something on the inputstream, no  switchException is thrown which switches the stream
+						// If there isn't reading something on the inputstream, no switchException(which switches the stream) is thrown
 						switchableInputStream.internStreamSwitch();
-					}
-					// signals the input stream that the next Exception is because of switching
-					switchableInputStream.setSwitchException(true);
+					// else set setSwitchException because there is one to be thrown
+					}else switchableInputStream.setSwitchException(true);
 					oldSocket.close();
-				//are there bytes left to read?
+				//Or are there bytes left to read?
 				}else if(numberOfBytesToRead > switchableInputStream.getNumberOfBytesReceived()){
 					System.out.println("numberOfBytesToRead > numberOfBytesToReceived");
 					System.out.println("numberOfBytesToRead :"
@@ -105,24 +96,7 @@ public class SwitchableSocket extends Socket {
 			e.printStackTrace();
 		} 
 	}
-	/**
-	 * Puts the new InputStream in the queue of the SwitchableInputStream
-	 * @param newSocket
-	 * @throws IOException
-	 */
-	private void putNewInputStream(Socket newSocket) throws IOException{
-			// provide the new InputStream to switch to
-			System.out.println("putting the new inputStream...");
-			switchableInputStream.switchInputStream(newSocket
-					.getInputStream());
-			// synchronized (switchableInputStream.inputStream) {
-			// System.out.println("im SS Block!");
-			// switchableInputStream.inputStream.notify();
-			// switchableInputStream.inputStream.wait();
-			// System.out.println("Aus dem SS Block!");
-			// }
-			
-	}
+	
 	/**
 	 * tries to transfer settings from old socket to the new one
 	 * and switches the references. Ignores exceptions to leave 

@@ -12,16 +12,19 @@ public class SwitchableOutputStream extends OutputStream {
 	private OutputStream outputStream;
 	private volatile int numberOfBytesSent;
 	
-	private boolean isSwitchException = false;
-
 	public SwitchableOutputStream(OutputStream outputStream) {
 		this.outputStream = outputStream;
 		this.numberOfBytesSent = 0;
 	}
-
-	public synchronized int switchOutputStream(OutputStream outputStream) throws IOException {
+	/**
+	 * 
+	 * @param newStream
+	 * @return the of bytes totally sent by this OutputStream
+	 * @throws IOException
+	 */
+	public synchronized int switchOutputStream(OutputStream newStream) throws IOException {
 		this.outputStream.flush();
-		this.outputStream = outputStream;
+		this.outputStream = newStream;
 		int number = numberOfBytesSent;
 		numberOfBytesSent = 0;
 		return number;
@@ -84,14 +87,6 @@ public class SwitchableOutputStream extends OutputStream {
 	public synchronized void write(int b) throws IOException {
 		numberOfBytesSent++;
 		outputStream.write(b);
-	}
-
-	public void setSwitchException(boolean isSwitchException) {
-		this.isSwitchException = isSwitchException;
-	}
-
-	public boolean isSwitchException() {
-		return isSwitchException;
 	}
 
 }
