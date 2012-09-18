@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * @author Ellen Wieland
+ * @author Steven Böckle
  * 
  */
 public class SwitchableOutputStream extends OutputStream {

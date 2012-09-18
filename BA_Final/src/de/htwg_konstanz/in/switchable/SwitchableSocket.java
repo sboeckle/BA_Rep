@@ -10,7 +10,7 @@ import java.net.SocketException;
 import java.nio.channels.SocketChannel;
 
 /**
- * @author Ellen
+ * @author Steven Böckle
  * 
  */
 public class SwitchableSocket extends Socket {
@@ -35,6 +35,7 @@ public class SwitchableSocket extends Socket {
 	public void switchSocket(Socket newSocket) {
 		try {
 			Socket oldSocket = socket;
+			switchableInputStream.setSwitching(true);
 			synchronized (switchableOutputStream) {
 				// Get the number of Bytes sent over old connection and switch the outputstream
 				int numberOfBytesSent = switchableOutputStream
@@ -57,16 +58,14 @@ public class SwitchableSocket extends Socket {
 					//Then just switch the Reference and the Stream
 					switchSocketReference(oldSocket, newSocket);
 					if(switchableInputStream.isReading() != true){
-						// If there isn't reading something on the inputstream 
-						// then no switchException(which switches the stream) is thrown
+						//the InputStream can be switched
 						switchableInputStream.internStreamSwitch();
 					// else set setSwitchException because there is one to be thrown
 					}else switchableInputStream.setSwitchException(true);
 					oldSocket.close();
 				//Or are there bytes left to read?
 				}else if(numberOfBytesToRead > switchableInputStream.getNumberOfBytesReceived()){
-					switchableInputStream
-							.setNumberOfBytesToRead(numberOfBytesToRead);
+					switchableInputStream.setNumberOfBytesToRead(numberOfBytesToRead);
 					// wait till all bytes are read over old connection before switching
 					synchronized (SwitchableInputStream.monitor) {
 						SwitchableInputStream.monitor.wait();

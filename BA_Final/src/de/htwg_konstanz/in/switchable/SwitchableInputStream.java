@@ -9,7 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import javax.management.monitor.Monitor;
 
 /**
- * @author Ellen Wieland
+ * @author Steven Böckle
  * 
  */
 public class SwitchableInputStream extends InputStream {
@@ -32,6 +32,7 @@ public class SwitchableInputStream extends InputStream {
 
 	private boolean isSwitchException = false;
 	private boolean isReading = false;
+	private boolean isSwitching = false;
 
 	public boolean isReading() {
 		return isReading;
@@ -127,7 +128,8 @@ public class SwitchableInputStream extends InputStream {
 						return data;
 					} else {
 						data = this.inputStream.read(b, 0, bytesToReadLeft);
-						// only switch the stream if all the bytes which are left has been read
+						// only switch the stream if all the bytes which are
+						// left has been read
 						if (data == bytesToReadLeft) {
 							// then switch it
 							internStreamSwitch();
@@ -139,9 +141,10 @@ public class SwitchableInputStream extends InputStream {
 						}
 					}
 				}
-			} else
+			} else {
 				this.isReading = true;
 				data = inputStream.read(b, off, len);
+			}
 		} catch (SocketException e) {
 			if (isSwitchException) {
 				internStreamSwitch();
@@ -154,6 +157,9 @@ public class SwitchableInputStream extends InputStream {
 		}
 		if (data != -1) {
 			numberOfBytesReceived += data;
+		}else if (isSwitching) {
+			internStreamSwitch();
+			return this.read(b,off,len);
 		}
 		this.isReading = false;
 		return data;
@@ -183,6 +189,7 @@ public class SwitchableInputStream extends InputStream {
 						// has there been an end of file? if so, its because of
 						// socket closing on the other side
 						if (data == -1) {
+							System.out.println("bin drin");
 							internStreamSwitch();
 							return this.read(b);
 						}
@@ -199,10 +206,10 @@ public class SwitchableInputStream extends InputStream {
 					}
 				}
 
-			} else
+			} else {
 				this.isReading = true;
-			data = inputStream.read(b);
-
+				data = inputStream.read(b);
+			}
 		} catch (SocketException e) {
 			if (isSwitchException) {
 				internStreamSwitch();
@@ -216,9 +223,8 @@ public class SwitchableInputStream extends InputStream {
 
 		if (data != -1) {
 			numberOfBytesReceived += data;
-		} else {
-			System.out.println("-------------------1 ");
 		}
+
 		this.isReading = false;
 		return data;
 	}
@@ -229,11 +235,29 @@ public class SwitchableInputStream extends InputStream {
 	 * @see java.io.InputStream#read()
 	 */
 	@Override
-	public int read() throws IOException {
+	public int read() {
 		int data = 0;
 		try {
+			if (numberOfBytesToRead != 0) {
+				if (numberOfBytesToRead > numberOfBytesReceived) {
+					int bytesToReadLeft = numberOfBytesToRead
+							- numberOfBytesReceived;
+					data = this.inputStream.read();
+					if (data == -1) {
+						internStreamSwitch();
+						return this.read();
+					} else {
+						numberOfBytesReceived++;
+						return data;
+					}
+				} else {
+					internStreamSwitch();
+					return this.read();
+				}
+			}
 			this.isReading = true;
 			data = inputStream.read();
+			// System.out.println("DATA recieved: " + data);
 		} catch (SocketException e) {
 			if (isSwitchException) {
 					internStreamSwitch();
@@ -242,11 +266,17 @@ public class SwitchableInputStream extends InputStream {
 			} else {
 				e.printStackTrace();
 			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		if (data != -1) {
-			numberOfBytesReceived++;
+			numberOfBytesReceived += data;
 		} else {
-			System.out.println("-------------------1 ");
+			if (isSwitching) {
+				internStreamSwitch();
+				return this.read();
+			} 
 		}
 		this.isReading = false;
 
@@ -266,6 +296,7 @@ public class SwitchableInputStream extends InputStream {
 				inputStream = newInputStreams.take();
 				this.numberOfBytesReceived = 0;
 				this.numberOfBytesToRead = 0;
+				this.isSwitching = false;
 				monitor.notify();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -292,6 +323,10 @@ public class SwitchableInputStream extends InputStream {
 	@Override
 	public long skip(long n) throws IOException {
 		return inputStream.skip(n);
+	}
+
+	public void setSwitching(boolean b) {
+		this.isSwitching = b;
 	}
 
 	public void setSwitchException(boolean isSwitchException) {
