@@ -2,42 +2,21 @@ package de.htwg_konstanz.in.switchable.tests;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.Arrays;
 
 public class FileChecker {
 
 	/**
-	 * Reads the File and Re-Writes it to the File system to be sure there are
-	 * no differences produced later due outputstream writing process
+	 * Compares two files array by array
 	 * 
-	 * @return the path to the Re-Written File
+	 * @param file1
+	 * @param file2
+	 * @return
 	 * @throws IOException
 	 */
-	public static String convertIt(String fileToConvertLocated, String pathForConvertedFile) throws IOException{
-		File f1 = new File(fileToConvertLocated);
-		System.out.println("Filelength of File to convert: "+f1.length());
-		FileInputStream fis1 = new FileInputStream(fileToConvertLocated);
-		byte[] buff = new byte[1024];
-		OutputStream out = new FileOutputStream(pathForConvertedFile);
-		long readData = 0;
-		long res = 0;
-		while((res = fis1.read(buff)) != -1){
-			out.write(buff);
-			readData += res;			
-		}
-		System.out.println("totalBytes wrote in converted File: "+ readData);
-		fis1.close();
-		out.flush();
-		out.close();
-		return pathForConvertedFile;
-	}
-
-	// reading bytes and compare
 	public static int CompareFilesbyByte(String file1, String file2)
 			throws IOException {
 		File f1 = new File(file1);
@@ -63,10 +42,16 @@ public class FileChecker {
 				}
 			}
 		} else
-			return -2; // length is not matched.
+			return -2; 
 		return 0;
 	}
 
+	/**
+	 * Generates a MD5Hash Code for a file
+	 * @param filename
+	 * @return
+	 * @throws Exception
+	 */
 	public static String MD5HashFile(String filename) throws Exception {
 		byte[] buf = ChecksumFile(filename);
 		String res = "";
@@ -76,6 +61,14 @@ public class FileChecker {
 		return res;
 	}
 
+	/**
+	 * 
+	 * Generates a Checksum for a file
+	 * 
+	 * @param filename
+	 * @return
+	 * @throws Exception
+	 */
 	public static byte[] ChecksumFile(String filename) throws Exception {
 		InputStream fis = new FileInputStream(filename);
 		byte[] buf = new byte[1024];
